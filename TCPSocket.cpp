@@ -12,6 +12,7 @@ TCPSocket::TCPSocket() {
 }
 
 TCPSocket::~TCPSocket() {
+	std::cout << "socket closing" << std::endl;
 	close(_socketfd);
 }
 
@@ -20,7 +21,7 @@ void TCPSocket::init_listener() {
 
 	// Sets up the address structure for server's listening socket (used by clients to connect)
 	_address.sin_family = AF_INET;
-	_address.sin_port = htons(6667); // Sets up port (should use a specified port instead)
+	_address.sin_port = htons(6666); // Sets up port (should use a specified port instead)
 	_address.sin_addr.s_addr = INADDR_ANY; // Sets up address (should use a specified address instead)
 
 	// Binds an address (IP + PORT essentially) to our _socketfd
@@ -38,7 +39,7 @@ void TCPSocket::init_listener() {
 void TCPSocket::init_accepted(const TCPSocket & listener_socket) {
 	// Initializes a new TCPSocket accepted by listener socket
 
-	socklen_t remote_address_len;
+	socklen_t remote_address_len = 0;
 
 	// Accepts a new connection from listener socket and fills the new socket
 	if ((_socketfd = accept(listener_socket.get_socketfd(), (struct sockaddr *)&_address, &remote_address_len)) < 0) {
@@ -49,11 +50,16 @@ int TCPSocket::get_socketfd() const {
 	return _socketfd;
 }
 
-struct sockaddr_in TCPSocket::get_address() const {
+const struct sockaddr_in & TCPSocket::get_address() const {
 	return _address;
 }
 
 std::ostream& operator<< (std::ostream& stream, const TCPSocket & tcpsocket) {
+	char address_str[INET_ADDRSTRLEN];
+	const struct sockaddr_in & sockin = tcpsocket.get_address();
+
 	stream << tcpsocket.get_socketfd();
+	stream << " [" << inet_ntop(AF_INET, &sockin.sin_addr, address_str, 16);
+	stream << ":" << ntohs(sockin.sin_port) << "]";
 	return stream;
 }

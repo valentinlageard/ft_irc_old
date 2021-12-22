@@ -9,6 +9,8 @@
 #include <sys/socket.h>
 // Needed to close a fd (however, it's a c header...)
 #include <unistd.h>
+// Used to convert the address to a readable string
+#include <arpa/inet.h>
 
 class TCPSocket {
 public:
@@ -19,7 +21,7 @@ public:
 	void init_accepted(const TCPSocket & listener_socket);
 
 	int get_socketfd() const;
-	struct sockaddr_in get_address() const;
+	const struct sockaddr_in & get_address() const;
 
 private:
 	TCPSocket(const TCPSocket & original);
